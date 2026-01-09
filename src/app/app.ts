@@ -16,6 +16,10 @@ export class App implements OnInit {
 
   taskList: { id: number; title: string; description: string; completed: boolean }[] = [];
   newTask = { id : 0, title: '', description: '', completed: false };
+  showForm = false;
+
+  filterName = "";
+  filterCompleted = "Todos";
 
   async ngOnInit() {
     console.log('App component initialized');
@@ -27,11 +31,12 @@ export class App implements OnInit {
       this.taskList = tasks;
     });
 
-    this.tasksService.loadTasks(); // Carga las tareas inicialmente
+    this.tasksService.loadTasks(this.filterName, this.filterCompleted); // Carga las tareas inicialmente
   }
 
   cleanForm() {
     this.newTask = { id : 0, title: '', description: '', completed: false };
+    this.showForm = false;
   }
 
   async addTask() {
@@ -48,6 +53,7 @@ export class App implements OnInit {
 
   async selectTask(task: { id: number; title: string; description: string; completed: boolean }) {
     this.newTask = { ...task };
+    this.showHideForm()
   }
 
   async toggleTaskCompletion(task: { id: number; title: string; description: string; completed: boolean }) {
@@ -58,5 +64,9 @@ export class App implements OnInit {
 
   async deleteTask(taskId: number) {
     this.tasksService.deleteTask(taskId);
+  }
+
+  showHideForm() {
+    this.showForm = !this.showForm;
   }
 }

@@ -14,8 +14,17 @@ export class Tasks {
 
     constructor(private http: HttpClient) {}
 
-    loadTasks(): void {
-      this.http.get<{ id: number; title: string; description: string; completed: boolean }[]>(this.base_url)
+    loadTasks(filtro_nombre = "", filtro_completed = "Todos"): void {
+
+      let url = `${this.base_url}?`;
+      if (filtro_nombre.trim()) {
+        url += `title=${filtro_nombre}`
+      } if (filtro_completed != 'Todos') {
+        url += (filtro_nombre.trim()) ? '&' : '';
+        url += `completed=${filtro_completed == 'Finalizada'}`
+      }
+
+      this.http.get<{ id: number; title: string; description: string; completed: boolean }[]>(url)
         .subscribe({
           next: (tasks) => {
             this.tasksSubject.next(tasks); // Emitir las nuevas tareas

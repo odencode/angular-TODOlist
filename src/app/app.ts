@@ -1,69 +1,92 @@
-import { ChangeDetectorRef, Component, inject, OnInit, signal } from '@angular/core';
-import { Tasks } from './services/tasks';
-import { NgForm } from '@angular/forms';
-import { log } from 'node:console';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Tasks } from './services/tasks'; // Asegúrate de que el nombre del servicio es correcto
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   standalone: false,
-  styleUrl: './app.css'
+  styleUrls: ['./app.css'] // Corrige a "styleUrls"
 })
-
 export class App implements OnInit {
-
-  constructor(private tasksService: Tasks) {}
-
   taskList: { id: number; title: string; description: string; completed: boolean }[] = [];
-  newTask = { id : 0, title: '', description: '', completed: false };
+  newTask = { id: 0, title: '', description: '', completed: false };
   showForm = false;
-
+  showLoading = false;
   filterName = "";
   filterCompleted = "Todos";
 
-  async ngOnInit() {
+  Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    }
+  }); 
+
+  constructor(private tasksService: Tasks) {}
+
+  ngOnInit() {
     console.log('App component initialized');
     this.loadTasks();
   }
 
   loadTasks() {
+    this.showLoading = true;
+    
+    this.tasksService.loadTasks(this.filterName, this.filterCompleted);
+    
     this.tasksService.tasks$.subscribe(tasks => {
-      this.taskList = tasks;
+      this.taskList = [...tasks];
+      this.showLoading = false;
     });
-
-    this.tasksService.loadTasks(this.filterName, this.filterCompleted); // Carga las tareas inicialmente
   }
 
   cleanForm() {
-    this.newTask = { id : 0, title: '', description: '', completed: false };
+    this.newTask = { id: 0, title: '', description: '', completed: false };
     this.showForm = false;
   }
 
-  async addTask() {
+  addTask() {
     if (this.newTask.title.trim()) {
-      if (this.newTask.id == 0) {
-        this.tasksService.addTask(this.newTask); // Call the service to add the task
+      if (this.newTask.id === 0) {
+        this.tasksService.addTask(this.newTask);
       } else {
-        this.tasksService.editTask(this.newTask); // Call the service to edit the task
+        this.tasksService.editTask(this.newTask);
       }
 
+      this.Toast.fire({ title: "Tarea guardada", icon: "success" });
       this.cleanForm();
+      this.loadTasks();
     }
   }
 
-  async selectTask(task: { id: number; title: string; description: string; completed: boolean }) {
+  selectTask(task: { id: number; title: string; description: string; completed: boolean }) {
     this.newTask = { ...task };
-    this.showHideForm()
+    this.showHideForm();
   }
 
-  async toggleTaskCompletion(task: { id: number; title: string; description: string; completed: boolean }) {
+  toggleTaskCompletion(task: { id: number; completed: boolean }) {
     task.completed = !task.completed;
 
+    if (task.completed) {
+      this.Toast.fire({ title: "Tarea Completada", icon: "success" });
+    } else {
+      this.Toast.fire({ title: "Tarea Pendiente", icon: "info" });
+    }
+
     this.tasksService.toggleTaskComplete(task);
+    this.loadTasks(); // Consider improving efficiency by not reloading all tasks
   }
 
-  async deleteTask(taskId: number) {
+  deleteTask(taskId: number) {
     this.tasksService.deleteTask(taskId);
+    this.Toast.fire({ title: "Tarea eliminada", icon: "warning" });
+    this.loadTasks();
   }
 
   showHideForm() {

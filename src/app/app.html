@@ -24,16 +24,45 @@
           </div>
         </div>
 
-        <div class="col-9"></div>
-        <div class="col-3 text-end my-2">
+        <div class="col-md-9 col-6"></div>
+        <div class="col-md-3 col-6 text-end my-2">
           <div class="d-grid">
             <button class="btn btn-outline-primary" type="button" (click)="showHideForm()">Nueva Tarea</button>
           </div>
         </div>
       </div>
       <ul class="list-group">
+
+        <div class="row" [class.d-none]="!showLoading">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title placeholder-glow">
+                  <span class="placeholder col-6"></span>
+                </h5>
+                <p class="card-text placeholder-glow">
+                  <span class="placeholder col-9"></span>
+                  <span class="placeholder col-7"></span>
+                  <span class="placeholder col-7"></span>
+                </p>
+                
+                <div class="row">
+                  <div class="col-2">
+                    <a class="btn btn-primary disabled placeholder col-12" aria-disabled="true"></a>
+                  </div>
+
+                  <div class="col-9"></div>
+
+                  <div class="col-1 text-end">
+                    <a class="btn btn-outline-danger disabled placeholder col-12" aria-disabled="true"></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <li *ngFor="let task of taskList" class="list-group-item" [class.bg-success-subtle]="task.completed">
-          
           <div (click)="selectTask(task)">
             <h5 class="text-capitalize" [class.text-decoration-line-through]="task.completed">{{ task.title }}</h5>
             <p [class.text-decoration-line-through]="task.completed">{{ task.description }}</p>
@@ -85,7 +114,7 @@
         <div class="row">
           <div class="col-md-8">
             <div class="d-grid">
-              <button type="button" class="btn btn-primary btn-sm" (click)="addTask()">Agregar Tarea</button>
+              <button type="button" class="btn btn-primary btn-sm" (click)="addTask()">Guardar Tarea</button>
             </div>
           </div>
           <div class="col-md-4">
